@@ -1,0 +1,93 @@
+Program Overview--------------------------------------
+The overall structure of this program is a Linked List type of data structure
+that contains is made up of a typedef struct records. The goal of this program
+is to Insert, Delete, or Get records that are in this Linked List, and prints out
+the Linked List when instructed to do so. To do these actions, the program calls
+on the methods responsible for the actions.
+
+The elements in this Linked List are records that contain a key, data, and next. 
+Key is an integer.
+Data is an integer.
+next points to the next element.
+In this Linked List, each key is unique and there cannot exist 2 records
+of the same key within the Linked List. Data however can be the same.
+
+Function Overviews-------------------------------------
+Insert Function
+	There were 2 ways I wrote the Insert Function because instead of having a 
+sorting method, I sorted the records while inserting it for part 2. of this assignment
+
+	Unsorted method
+		I would create a new record with the new key and data. Then I 
+	used malloc and if it failed to allocate memory, it would return -1.
+	Then I checked if ListHead was null. If it was I would just set 
+	ListHead = new record and return 1.
+	I had a ListHead and a ListTail pointer. To insert without sorting,
+	I simply had the ListTail->next point to the new record element. The new 
+	record element->next pointed towards NULL so that ListTail->next would
+	always be NULL. Then I set ListTail to the new element.(This was the way
+	I inserted, after checking if the record already existed with a while loop)
+
+	Sorted method
+		I created a new record with the new key and data. Used malloc. If
+	memory allocation failed, it would return -1.
+	I used a while loop to make sure that my new record->key didn't 
+	already exist in the Linked List. If it existed, then it would return 0. 
+	 Then I checked if the ListHead->key was
+	greater than the new key. If it was, I put the new element in front of 
+	ListHead which became the new ListHead. I also checked to see if the key
+	was less than the ListTail to see if this new element should be the new
+	ListTail. The last case was if it was inbetween ListTail and ListHead. 
+	I ran a while loop and checked to see if this new element was greater 
+	than the current key, but smaller than the next->key. If it was, I 
+	inserted this new record element between these 2 by setting 
+	new record->next = tempList->next->next. and 
+	tempList->next = new record. Once it was inserted, it would return 1.
+	Also if ListHead was null to begin with, I just set the new ListHead
+	as the new element.
+	
+Get Function
+	I checked to see if the key existed already in the Linked List with a 
+while loop. If it did, then I returned the value of the data. If not, I returned
+0 since it was not found. Also if ListHead was NULL to begin with, then I just
+returned 0;
+
+Delete Function
+	I created a dummy record to store an element. If memory allocation failed
+, then it would return -1.
+If ListHead was NULL, then I just returned 0 since there is nothing 
+in this Linked List. Then I ran the linked list through a while loop to check if 
+this key existed. I checked by seeing if tempList->next->key == key. If it was 
+then I had a dummy_record = tempList->next. Then had tempList->next == tempList->next-next.
+This way the one in the middle can be taken out when I call free(dummy record). This would then
+return 1.
+
+Print Function
+	Ran through the whole List and printed the key and data of the list.
+
+Difficulties
+	Initially, coming up with a search function required a bit of thinking, since
+the linked list was slightly different from stacks and queue.
+
+	Coming up with the insertion method, especially sorted was also a bit difficult
+since we needed to use pointers to point to new things. Finding out how to check the 
+endpoints also made it a bit more challenging.
+
+	When running the program, it seems like an uneven amount of records would 
+exist in the repository when we called print. This was probably due to memory
+leakage in the Delete method.
+
+3. Test Results
+Seed	Unsorted	Sorted
+1	3,758,823,786	4,069,988,442
+2	3,756,818,721   4,067,310,490
+3	3,757,720,690   4,067,905,587
+4	3,759,072,651   4,070,348,016
+5	3,755,957,664   4,065,558,712
+Avg:    3,757,678,702   4,068,222,249
+
+From all these different seeds, the Sorted programs always has a higher next count.
+Usally around 300 million more steps. I believe this happens because we take extra 
+steps to sort the keys whereas the unsorted just attaches the key to the end of the list.
+If we used different search algorithms, then the sorted program may actually be more
+efficient.
