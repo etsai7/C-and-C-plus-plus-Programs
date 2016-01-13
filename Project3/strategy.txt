@@ -1,0 +1,201 @@
+Program Overview----------------------------------------------------------
+In this program, I used a SuperList data structure where each "level"
+had a sentinel node connecting to the record to the right and below.
+The structure is made up of a typdef struct called records and contains
+an key, a pointer to data, a pointer to the next record on the same level,
+and a pointer to a record below the current record. There was a Listhead 
+which pointed to the upperleft corner of this structure. The "record" it
+points at is actually the sentinel node for the highest level. There was
+also a pointer to the lowest level of the structure called BottomHead
+which was initialized when the ListHead was initialized.
+The only thing different about BottomHead is that throughout the 
+program it would not change because no matter how many time the 
+program deletes records, there will always exist a sentinel node
+at the lowest level of the structure.
+
+To traverse list, we start with ListHead at the top left side and 
+work our way down. There are 2 cases:
+
+Case 1: We need to know how many records in that lvl
+In this case, we start at ListHead and run a while loop
+as long as there is a next record != NULL. This should
+run through all the records in that level. This case is
+only used for printing since it is less efficient, but
+necessary.
+
+Case 2: We only need to search up to a key that is greater than
+the key we are told to find. Once it hits the record with a 
+bigger key, we move down a level and repeat the process until
+we are at the very bottom. Depending on the method, there will
+also be additional steps taken while it traverses through the 
+structure.
+
+Contents of record:
+int key
+int *data
+record *next
+record *down
+
+Choosing MAX_RANGE---------------------------------------------------
+From project 1 and 2, the average amount of unique keys in the 
+repository should be about half of the total amount of possible keys. 
+This is due to the fact that only insert and delete will change the 
+size of the repository. Since both methods occur 25% of the time, we 
+have a 50% chance of a record with that specific key existing in the
+repository. Therefore the amount of unique records in the structure
+should be about N/2 where N is the max range of the keys. 
+
+Since the largest possible range is 10,000, we will use this to 
+calculate an appropriate max amount of levels. From N/2, the average
+amount of unique records will be around 5,000 records. For the probability,
+I will test up to around 75% because the instructions asks for tests
+between 50-75%. Higher percentages will have a higher level count, but will
+not fit on the screen and print nicely. Therefore I chose to cap it at 75%.
+Ideally, the last level/ highest level should contain only one record. How 
+many level it takes to reach that point depends on the probability which
+can be represented by the equation:
+
+        5000(p)^levels = 1 
+
+where 5000 is the average amount of records
+      p is the probability in fraction/decimal
+      levels is the amount of levels needed to reach and average of 1 record
+      at the highest level.
+We plug in p = .75 and solving for levels, we get levels to be about 30.
+Therefore the max amount of levels for a probability of 75% is about 30.
+
+Methods------------------------------------------------------------
+Repository_init
+    Initialized a sentinel node that a pointer ListHead and BottomHead
+    points to. ListHead will change as the structure gains or loses
+    levels. BottomHead will not. It should always be pointing to the
+    lowest level of the structure. We also set the probabiliy of 
+    increasing a level and begin the count of amount of levels at 1.
+
+Repository_update
+    We traverse from ListHead using Case 2 from above. Everytime we find 
+    that the next key is bigger than the key we are given, we store the
+    record we are currently on in an array and move down a level. Starting
+    from where we just moved down, we move along that level until we need to
+    go down another level. If while we traverse through this structure and 
+    find a record->key == key, then we update the existing record with a new 
+    data pointer and return 0. We put it in a data Pointer so that all records
+    in this entire structure will also be updated with the new data. However,
+    if we do not find an existing key, once we reach the bottom and at the 
+    appropriate place, we create a record with the given key and data and 
+    insert that at the position. Then using the array of stored pointers 
+    to the points before we moved down, we also add a new record after these pointers
+    and point them below to the previously added records. The amount of times
+    we add to a different levels depends on the probability which is deteremined
+    by rand100(). If we meet the conditions, we keep adding new records after 
+    the ones in an array. Once we run out of pointers in the array, we can create
+    new levels to add the new records as long as the probability condition and 
+    amount of lvls <= MAX_LEVELS condition are met.
+        
+Repository_delete
+    We traverse from ListHead using Case 2 from above. Everytime we find
+    that the next record's key is bigger than the key we are told to delete,
+    we go down a level. If we do find the key, store the data pointer of
+    that particular record into a temp pointer only once and free it at the 
+    end. This way we don't free it everytime we see this record as this would
+    cause an error when we try to free something that doesn't exist anymore.
+    Once we have set the data pointer, we set the record we need to delete to
+    a temporary pointer. This is then freed. As we traverse the list, we will
+    be deleting the records top down. As we delete the records, we also check that
+    the level doesn't only contain a sentinel node. If there are no other records,
+    then we must reduce the amount of levels. If this occurs, we set
+    ListHead = ListHead->down and make sure that the previous ListHead was freed
+    when we stored it in a tempListHead pointer.
+
+Repositoryy_get
+    We travers from ListHead using Case 2 from above. When we find the key 
+    we were told to find, we stored the record->data into *data and returned 1
+    for finding it. By returning, we don't waste steps traversing through the
+    entire list. Otherwise if no key is found, we cannot update and hence the
+    method returns 0.
+
+Repository_print
+    Here we traverse through the structure using Case 1 in order to get the
+    number of records per level. There are three ways to print in addition to
+    printing out the number of levels, number of steps, number of unique 
+    records, and number of records per level.
+
+    print_elements == 1
+        Here we also need to print all the unique records. This can be down
+        when we traverse the lowest level and prints as we go along it.
+
+    print_elements == 2
+        Here we print out the entire repository in an organized way.
+        As we traverse through each level, we print out the records.
+        However the way I set it up to print is a sideways kind of format
+        in order to fit all records in a nice manner. The top axis is the
+        level number and the left vertical axis is the unique records.
+
+    print_elements == 0
+        Here we just print the levels and number of records with the 
+        corresonding level. No record is explicitly printed.
+
+    *Here I chose to print the structure in a sideways kind of manner so that
+    we are able to print out the structure and fit it all on the screen in an 
+    orderly manner.
+    
+    *In this method, I chose to run a separate while loop to find out how many
+    records are in the structure per level instead of just finding it out as
+    I traverse the structure during the loop that checks for print_elements == 1
+    or print_elements == 2 because in order to check each level for the amount of
+    records, I need to run through every single record to count them. Since I only
+    need to count how many records are in each level once per print method call, this
+    would be way too inefficient. Therefore I first run a while loop tell me how 
+    many times I would need to print out the record to resemble the structure. This 
+    doesn't run through every single record in each level, but stops when it finds that
+    the next key is bigger than the key I want to find. (this is very similar to my insert
+    method of traversing through the structure). Then in a separate while loop, I would 
+    run through the entire structure that went through every single record to count
+    how many records were in the level. This way should be more efficient than having
+    the same while loop that ran through every single record unnecessarily.
+    
+Results------------------------------------------------------------------- 
+2.
+Seed       1. d             1. e             1. f
+1       172,298,865     1,728,406,886     478,158,394
+2       172,318,387     1,729,348,474     477,833,552
+3       172,250,512     1,730,790,115     478,939,838
+4       172,177,693     1,728,534,762     477,365,041
+5       172,402,783     1,729,278,974     474,410,842
+Avg     172,289,648     1,729,271,842     477,341,533
+
+    The average amount of steps is calculated from the average amount of traversals through the 
+methods. Here, the calculations are based off of N/2 where N is total amount of keys.
+For the calculation example below, I will be using the 20 million operations and 10000 keys
+as an example. All other calculated would be similar. 
+    On average, we would need to traverse through the entire structure while inserting
+and deleting. That means we would traverse through log2(5000) which comes out to be around 
+12. That means there will be 12 steps to get to the bottom of the strucutre. Since we are
+also traversing towards the right to find the correct key to insert or delete, this is
+basically a binary search so it will take log2(5000) steps again, which is just double of
+12 or 24. Since insert and delete account for 50% of the operations, that means we multiply
+24 * 10,000,000 to get 240,000,000. For the get method, there is still a great probability
+that we will need to traverse the structure till the bottom to finally find a key and return
+its data value. For computation sake, we will also assume that the Get method will require
+2log2(5000) or about 24 steps. Since it accounts for 50% of all operations, it will take up
+240,000,000 steps as well. Therefore the average for the program should be around 480,000,000
+steps. A reason why my steps are lower is because the Get method may usually require less steps
+because it does not have to always traverse the entire structure. Therefore my results are slightly
+below the calculated average.
+
+3.
+Seed   25%             50%             75%
+1      157,365,808     172,298,865     291,577,535
+2      157,410,820     172,318,387     293,931,097
+3      157,379,918     172,250,512     294,602,946
+4      157,540,075     172,177,693     292,576,724
+5      157,626,651     172,402,783     294,210,389
+
+The averages are calculated like above, but the log base instead
+is 1/.p so 25% would be calculated with logbase 4 and 
+75% would be calculated with a base of 4/3. In this case,
+we would multiply by 10,000,000 since that is the operations
+for this case, but otherwise, the average is still around 
+2logn(500) where n is the probability 1/.p
+
+ 
