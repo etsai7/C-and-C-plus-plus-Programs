@@ -1,0 +1,156 @@
+Part 1: The Data Structure
+
+In part 1, I created a Data structure that would explode or implode depending on how much
+data we needed to store. This structure used Hash to help place the objects and also to
+access these objects faster than previous data structures. The structure was like a tree that
+was composed of Hash Nodes. Each node contained an array that carried 5 integers, an array that
+carried 5 Objects (we used templates so we can put whatever object), and an array that
+carried 5 pointers to the next level/branches of this tree of type Hash Node. The Hash Tree
+class contains a Head Node which points to the Hash Node at the very top and from which all
+other Nodes propogate from. This Progrm uses the ML_Hash file to get the Hash needed to place
+the objects. It is used by calling it with the next level you want to place the current object
+and also the id of the object. The Hash Tree has methods such as Insert, Delete, Get, and Print.
+
+The Hash Tree constructor initializes the Head Node and sets all the arrays inside that Head
+Node into either 0 for the int array or NULL for the Objects/Pointer Array. 
+
+The Hash Tree destructor deletes the Head Node, which subsequently calls the destructor on 
+the Node. There, the Node will clear out all its arrays and delete all objects and pointers
+before deleting itself.
+
+The Hash Tree insert is where we insert the given object and id. It calls on a helper method
+which will use the Head Node and ML_Hash to traverse the tree in order to place the object.
+If we try to insert something without a node, the program will create a new head node to add 
+it. Once the insert method calls insert_help method, the insert_help will use recursion to 
+find a place to add the object and id. It will explode, or create more nodes, if the node
+where your new object and id belongs is 5. Then it will move those objects and ids into 
+respective new nodes when we call the ML_Hash for each respective id. The program traverses
+through the tree by checking of the node contains an object count greater than 5. If it is, that
+means there should be another Node created below, or branches out to a childe node. It will then
+recursively call this same function, but incrementing the current level by 1 to indicate where 
+it at, in terms of level, on the tree. It will do so until it finds a place hat is less than 5
+and then check to see if it can add it. If no other id in the array list shows up, then the object
+and id are placed into their respective arrays. The method also returns an integer of 1 so that
+as we go back up the tree, we can increment the object count in each node.
+
+The Hash Tree get method is where we try and access an object. It returns a pointer to the object
+assosicated to the id we enter for the get method. Like the insert method, the get method traverses
+through the tree depending on the amount of object count in each node is. If it is greater than 5, 
+that means the node will not be holding any ids or objects so it must continue going down. It does
+so by Hashing the id we entered in order to find the next Node or branch/child it would need to go
+to get closer to the Object and assosicated id. If it finds it, the method will return a pointer 
+to the Object associated with the id. If not, then it will return NULL pointer. Nothing in this method
+changes any of the data stored in this Data Structure.
+
+The Hash Tree delete method is similar to the insert method, but instead clears out the Object 
+and ID in the Node array its in and returns a pointer to the Object. The delete method will call on a 
+delete helper method which contains a Node pointer, the current level its on, and the ID you want to
+delete. It traverses like the insert method, by checking the amount of object in the node count. If the 
+Head Node from which is first used is NULL, then the method automatically returns NULL since there are 
+not objects that we can traverse through, let alone return. If its greater than 5 then it will keep going
+down by recursively calling itself and using the ML_Hash methodto help determine which node in the next
+level to go to. Once it arrives at the correct node that contains5 or less objects, it checks to see if
+the object we want to delete is there. If no, then it returns a NULL pointer. If yes, then it stores the 
+object in a pointer, sets the Object array space to null and the ID array space to 0 and then returning 
+back up a Node from which it was called. Once it goes back up and the program realizes the returned pointer
+is NOT NULL, then it checks to see if we should implode the branches. The Nodes implode if the amount of
+objects count is now 5 after successfully deleting an object. It then runs through all of its nodes array 
+and copying back the ID and Objects, before deleting the nodes and setting its Node array space back to 
+NULL. Once it does that, it will continue returning the Object further up the tree until it reaches the 
+Head Node and returns the pointer.   
+
+The Hash Tree MLH_Set_Print Option just sets a specific integer so that when we call print later on, the
+program knows whether or not to print the Objects. 
+
+The Hash Tree Print method traverses the list like the Insert method by checking whether or not it needs
+to go down a level/branch by checking the amount of objects in each node. Once it reaches the lowest nodes
+which contains the objects, it will print out the id and the objects. Depending on what the setting is, it
+will either print just IDs or it will print IDs AND Objects. It only prints on nodes that contains Objects
+and IDs in its arrays. It travels up and down through recursion. A while loop ensures that all the pointers
+to other nodes array are traversed through so that nothing is missed while printing.
+
+The print total steps, lowest level, and amount of objects in the Hash Tree simply call on an integer that
+keeps track of the steps and the amount of objects every time something is added or deleted. As for the lowest
+level, we find that out through an array that is of size 9 so indexes 0-8 contain the amount of nodes that 
+are in the particular level. However, when we print it prints from 1-9.
+Every time we delete a node, the level array will subtract from that stored 
+integer and if we add a node, the particular space at that level array will add. To find out which is the lowest
+which run a while loop until we hit a level space that is 0, meaning that right before the 0, there was
+at least one node in that level and hence that number is the lowest level of this structure.
+
+We also overload the ostream << operator so that we can print Hash Trees that contain various types of
+Objects. Calling on << *(tree) will call the Hash Tree print, print steps total, and print lowest level.
+
+Benchmarks: Seed 1
+Key Range   Operation   Steps       Objects     Nodes
+100         1000        3380        44          47
+100         1,000,000   4,037,820   56          60
+10,000      1,000,000   4,970,046   5089        4874
+100,000     10,000,000  62,255,361  49899       42695
+
+Seed        1M Steps    1M Objects  1M Nodes    10M Steps   10M Objects     10MNodes   
+1           4970046     5089        4874        62255361    49899           42695          
+2           4878357     4945        4274        65664679    49790           43902          
+3           4880935     4935        4712        65671755    49992           43740       
+4           4884970     5047        4762        65686775    49897           43850         
+5           4877845     4855        4771        65684420    50036           44028         
+6           4877421     4957        4769        65673773    49718           43552    
+7           4881065     4962        4716        65664466    50025           44051      
+8           4879649     5092        4811        65654491    49815           43988    
+9           4880911     5017        4760        65675477    49911           43840     
+10          4884146     5103        4858        65663926    49896           43979     
+
+Conclusion:
+Like Previous Projects, the percentages seem to be 50% get, 25% delete, and 25% insert
+This means that we will altering the data structure only half the time when we cll
+the insert or delete. Since we are inserting and deleting 50% of the time respectively,
+That means at most, only half the total amount of keys should be in the data structure.
+From the results, they all hover about 25% of the inputted key range. On average it 
+takes about 5 to 6.5 steps for an operation. Every time the program goes down a level,
+it will increment the amount of steps.
+
+Part2: Service Center
+In this part the program uses part 1's data structure to store vehicles and add tasks to it. The types of 
+vehicles are cars, hybrids, bus, and motorcycle. We use inheritance for this part. Vehicle being the most 
+general type of object and every other vehicle inherits from vehicles. The generic vehicle contains 
+an ID, model, type of fuel, and mileage. The rest of the vehicles all contain some extra variables for
+other characteristics, but all similar to Vehicle. The vehicle also contained a Task list which
+users can add or perform on the Vehicle. It is just a dynamic list that can store tasks objects that
+contain a name for the task, the labor cost, and parts cost. So a vehicle can add a task, by entering
+the above information. The vehicle also has a get id method so that the users can store the vehicle
+and to make sure there isn't a duplicate vehicle with the same id. There is a checkout method which will
+prints out the information of the vehicle through print() and
+also print out the bill from the Task List by calling print bill. Printing the bill will add up
+all the costs of all the Tasks in the Task list. All other vehicles use basically this same print method
+but with slightly more prining depending on how many other variables it has compared to Vehicle.
+Vehicle also has the overloaded operator << so that when we want to Print a Vehicle type object
+or any of its subclasses, it will print all the information of Vehicle by calling Print and print bill.
+All other types of vehicles will do so as well since it inherits from Vehicle.
+
+When the Service Center is initialized, it creates a new Hash Tree pointer to store the items in it.
+It also initalizes a current vehicle to NULL. This changes as the user inputs information from the menu.
+
+In the Service Center, the user enters the Menu from the main driver of this program. There they
+can choose to add a new vehicle, add a task to the vehicle, checkout a vehicle, print the Tree of
+vehicles, or exit the service center. Adding a new vehicle will ask the user for input such as an id, model,
+color, and mileage. Depending on what kind of vehicle is chosen, there will be more options for user input.
+Once it creates that new vehicle, it will then add it by calling on the Hash Tree pointer this Service Center 
+contains. And how it is added is described in part 1.  
+
+Adding a task will prompt the user to enter an id of the car it wants to add a task to. Once a valid ID is 
+found, then it will get that vehicle from the Hash Tree get method and store it in current vehicle before 
+asking what kind of task the user may want to add onto the car. It will prompt them to another menu to choose
+their choice and enter a specific price.
+
+Checking out will also prompt the user to enter an id of the car and then uses the Hash Tree delete method
+to find the corresponding vehicle. It will then perform the delete as described in part one and return 
+the corresponding object. Then from Service Center, the program will delete this object, which will print
+out the data of the car, the tasks it contained, and what the total was in the end.
+
+Printing out the Service Center just calls the Hash Tree print method and prints out only the IDs of the 
+car so as to not overwhelm the user with all the data of every single vehicle. Plus that information
+should be confidential and not open to everyone. 
+
+Then the 5th and last option is to exit the center. From there, the program will print out all the Ids
+and Objects of the vehicles before exiting out. From main, we then delete the service center to prevent
+memory loss.
